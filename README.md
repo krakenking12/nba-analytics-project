@@ -213,8 +213,7 @@ This is a portfolio project, but suggestions are welcome!
 **Evan Gomez**
 - Email: evan1116@icloud.com
 - Location: Thousand Oaks, CA
-- LinkedIn: [Your LinkedIn]
-- Portfolio: [Your Website]
+
 
 ## 📄 License
 
