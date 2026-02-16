@@ -16,6 +16,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import requests
 import json
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -26,20 +27,27 @@ warnings.filterwarnings('ignore')
 
 class NBAAnalytics:
     """NBA Game Analytics and Prediction System"""
-    
+
     def __init__(self):
-        self.base_url = "https://www.balldontlie.io/api/v1"
+        self.base_url = "https://api.balldontlie.io/v1"
+        self.api_key = os.getenv('NBA_API_KEY')
+        self.headers = {'Authorization': self.api_key} if self.api_key else {}
         self.games_data = None
         self.teams_data = None
         self.stats_data = None
         self.model = None
+
+        if not self.api_key:
+            print("⚠️  No API key found. Set NBA_API_KEY environment variable.")
+            print("   See API_SETUP.md for instructions.")
+            print("   Or run demo.py for a version that works without API.\n")
         
     def fetch_teams(self):
         """Fetch all NBA teams"""
         print("Fetching NBA teams data...")
         url = f"{self.base_url}/teams"
-        response = requests.get(url)
-        
+        response = requests.get(url, headers=self.headers)
+
         if response.status_code == 200:
             data = response.json()
             self.teams_data = pd.DataFrame(data['data'])
@@ -47,6 +55,9 @@ class NBAAnalytics:
             return self.teams_data
         else:
             print(f"✗ Error fetching teams: {response.status_code}")
+            if response.status_code == 401:
+                print("   API key is invalid or missing.")
+                print("   Get a free key at: https://app.balldontlie.io/signup")
             return None
     
     def fetch_games(self, seasons=['2023', '2024'], max_pages=10):
@@ -66,7 +77,7 @@ class NBAAnalytics:
                 url = f"{self.base_url}/games?seasons[]={season}&per_page=100&page={page}"
                 
                 try:
-                    response = requests.get(url)
+                    response = requests.get(url, headers=self.headers)
                     if response.status_code == 200:
                         data = response.json()
                         games = data['data']

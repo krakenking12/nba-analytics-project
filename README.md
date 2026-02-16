@@ -39,11 +39,34 @@ This project builds a predictive model for NBA game outcomes using historical ga
 - Win rate by team strength correlation
 - Feature importance rankings
 
+## ⚠️ API Key Required (2024 Update)
+
+The NBA API now requires a **free API key**. Two options:
+
+### Option 1: Get Free API Key (for real data)
+1. Sign up at https://app.balldontlie.io/signup
+2. Get your API key from the dashboard
+3. Set it in your environment:
+   ```bash
+   export NBA_API_KEY="your_key_here"
+   ```
+4. Run any script - they'll use real NBA data
+
+See **[API_SETUP.md](API_SETUP.md)** for detailed instructions and alternatives.
+
+### Option 2: Use Demo Mode (no API needed)
+```bash
+python3 demo.py  # Works immediately, uses sample data
+```
+
 ## 🎯 Predict Any Matchup
 
-Use the **Matchup Predictor** to predict outcomes for any NBA game:
+**Requires API key** - Use the **Matchup Predictor** to predict outcomes for any NBA game:
 
 ```bash
+# Set your API key first
+export NBA_API_KEY="your_key_here"
+
 # Interactive mode - choose any teams
 python3 predict_matchup.py
 
