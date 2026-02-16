@@ -11,6 +11,7 @@ Or specify teams directly:
 """
 
 import sys
+import pandas as pd
 from nba_analytics import NBAAnalytics
 
 
@@ -82,9 +83,10 @@ def get_team_recent_stats(nba, team_name, games_back=5):
     visitor_games['won'] = (visitor_games['visitor_team_score'] > visitor_games['home_team_score']).astype(int)
 
     # Combine all games
-    all_games = home_games[['date', 'team_score', 'opp_score', 'won']].append(
+    all_games = pd.concat([
+        home_games[['date', 'team_score', 'opp_score', 'won']],
         visitor_games[['date', 'team_score', 'opp_score', 'won']]
-    )
+    ], ignore_index=True)
 
     # Remove games without scores (future games)
     all_games = all_games[all_games['team_score'].notna()].copy()
