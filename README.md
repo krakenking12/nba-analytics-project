@@ -39,25 +39,48 @@ This project builds a predictive model for NBA game outcomes using historical ga
 - Win rate by team strength correlation
 - Feature importance rankings
 
+## 🎯 Predict Any Matchup
+
+Use the **Matchup Predictor** to predict outcomes for any NBA game:
+
+```bash
+# Interactive mode - choose any teams
+python3 predict_matchup.py
+
+# Direct prediction
+python3 predict_matchup.py "Lakers" "Warriors"
+python3 predict_matchup.py "Celtics" "Heat"
+```
+
+Features:
+- 📅 Uses **2024 season** data (most recent available)
+- 🏀 Predict **any team matchup**
+- 📊 Real team statistics from last 5 games
+- 🎲 Win probability for both teams
+- 💡 Confidence levels (High/Medium/Toss-up)
+
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nba-analytics-project.git
+git clone https://github.com/krakenking12/nba-analytics-project.git
 cd nba-analytics-project
 
-# Install dependencies
-pip install -r requirements.txt
+# Quick demo (uses sample data - fast!)
+./quickstart.sh
 
-# Run the analysis
-python nba_analytics.py
+# Or predict any matchup (uses real NBA data)
+python3 predict_matchup.py
+
+# Or run full analysis
+python3 nba_analytics.py
 ```
 
 ### Requirements
 
-- Python 3.8+
+- Python 3.11+ (3.13 supported!)
 - pandas
 - numpy
 - scikit-learn
