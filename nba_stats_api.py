@@ -5,71 +5,30 @@ Free, unofficial API with current NBA data
 NO PANDAS REQUIRED - uses only built-in Python!
 """
 
-import requests
-from datetime import datetime
 import time
+from datetime import datetime
+from nba_api.stats.endpoints import teamgamelog as nba_teamgamelog
 
 class NBAStatsAPI:
     """Interface to NBA Stats API (stats.nba.com)"""
 
     def __init__(self):
-        self.base_url = "https://stats.nba.com/stats"
-
-        # Required headers to mimic browser request
-        self.headers = {
-            'Host': 'stats.nba.com',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'x-nba-stats-origin': 'stats',
-            'x-nba-stats-token': 'true',
-            'Connection': 'keep-alive',
-            'Referer': 'https://stats.nba.com/',
-            'Pragma': 'no-cache',
-            'Cache-Control': 'no-cache'
-        }
-
         self.current_season = "2025-26"
-
-    def _make_request(self, endpoint, params):
-        """Make API request with retry logic"""
-        url = f"{self.base_url}/{endpoint}"
-
-        for attempt in range(3):
-            try:
-                response = requests.get(url, headers=self.headers, params=params, timeout=30)
-
-                if response.status_code == 200:
-                    return response.json()
-                elif response.status_code == 429:
-                    print(f"Rate limited, waiting {2 ** attempt} seconds...")
-                    time.sleep(2 ** attempt)
-                else:
-                    print(f"Error {response.status_code}: {response.text[:200]}")
-                    return None
-
-            except Exception as e:
-                print(f"Request failed (attempt {attempt + 1}/3): {str(e)}")
-                time.sleep(1)
-
-        return None
 
     def get_team_game_log(self, team_abbr, season=None):
         """
-        Get recent games for a team
+        Get recent games for a team using nba_api
 
         Args:
             team_abbr: Team abbreviation (e.g., 'LAL', 'BOS')
-            season: Season year (default: current season)
+            season: Season year (default: current season, '2025-26')
 
         Returns:
-            List of game dictionaries with headers
+            List of game dictionaries
         """
         if season is None:
             season = self.current_season
 
-        # First get team ID from abbreviation
         team_id = self._get_team_id(team_abbr)
         if team_id is None:
             print(f"✗ Could not find team: {team_abbr}")
@@ -77,29 +36,19 @@ class NBAStatsAPI:
 
         print(f"Fetching game log for {team_abbr} (Team ID: {team_id})...")
 
-        params = {
-            'TeamID': team_id,
-            'Season': season,
-            'SeasonType': 'Regular Season',
-            'LeagueID': '00'
-        }
-
-        data = self._make_request('teamgamelog', params)
-
-        if data and 'resultSets' in data and len(data['resultSets']) > 0:
-            headers = data['resultSets'][0]['headers']
-            rows = data['resultSets'][0]['rowSet']
-
-            # Convert to list of dicts
-            games = []
-            for row in rows:
-                game = dict(zip(headers, row))
-                games.append(game)
-
+        try:
+            time.sleep(0.6)  # Respect rate limits
+            log = nba_teamgamelog.TeamGameLog(
+                team_id=team_id,
+                season=season,
+                season_type_all_star='Regular Season'
+            )
+            df = log.get_data_frames()[0]
+            games = df.to_dict('records')
             print(f"✓ Fetched {len(games)} games for {team_abbr}")
             return games
-        else:
-            print(f"✗ Failed to fetch game log for {team_abbr}")
+        except Exception as e:
+            print(f"✗ Failed to fetch game log for {team_abbr}: {e}")
             return None
 
     def _get_team_id(self, team_abbr):
