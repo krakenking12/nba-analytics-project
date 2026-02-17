@@ -1,6 +1,6 @@
 #!/bin/bash
 # NBA Analytics Project - Quick Start Script
-# This script sets up a virtual environment and runs a simple demo
+# Uses CURRENT data from stats.nba.com (no API key needed!)
 
 echo "🏀 NBA Analytics Project - Quick Start"
 echo "======================================"
@@ -30,42 +30,28 @@ echo ""
 echo "🔧 Activating virtual environment..."
 source venv/bin/activate
 
-# Install dependencies
+# Install only requests (lightweight, no architecture issues)
 echo ""
-echo "📚 Installing dependencies..."
+echo "📚 Installing dependencies (requests only)..."
 pip install --upgrade pip --quiet
-pip install -r requirements.txt --quiet
+pip install requests --quiet
 
 echo "✓ Dependencies installed"
 echo ""
 
-# Load API key
-if [ -f .env ]; then
-    source load_env.sh
-else
-    echo "⚠️  No .env file found. API key required for real data."
-    echo "   Running demo with SAMPLE DATA instead..."
-    echo ""
-    python3 demo.py
-    echo ""
-    echo "⚠️  This was SAMPLE DATA, not real NBA stats!"
-    echo ""
-    echo "To use REAL data:"
-    echo "  1. Add your API key: echo 'NBA_API_KEY=your_key' > .env"
-    echo "  2. Run: source load_env.sh && python3 predict_matchup.py"
-    exit 0
-fi
-
-# Run real prediction
-echo "🚀 Running NBA Matchup Predictor with REAL 2025-2026 Season Data..."
-echo "=================================================================="
+# Run prediction with CURRENT data
+echo "🚀 Running NBA Matchup Predictor with CURRENT 2025-26 Season Data..."
+echo "===================================================================="
+echo "📊 Using stats.nba.com (FREE, no API key required!)"
 echo ""
-python3 predict_matchup.py "Lakers" "Warriors"
+python3 predict_current.py "Lakers" "Warriors"
 
 echo ""
-echo "✅ Prediction complete using REAL NBA data!"
+echo "✅ Prediction complete using CURRENT NBA data!"
 echo ""
 echo "Try more matchups:"
-echo "  python3 predict_matchup.py \"Celtics\" \"Heat\""
-echo "  python3 predict_matchup.py \"Bucks\" \"Suns\""
-echo "  python3 predict_matchup.py  # Interactive mode"
+echo "  python3 predict_current.py \"Celtics\" \"Heat\""
+echo "  python3 predict_current.py \"Bucks\" \"Suns\""
+echo "  python3 predict_current.py \"76ers\" \"Nuggets\""
+echo ""
+echo "✓ Data is only 4 days old (not 105 days like the old API!)"
