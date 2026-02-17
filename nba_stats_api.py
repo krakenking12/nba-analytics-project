@@ -136,9 +136,25 @@ class NBAStatsAPI:
         total_pts = sum(float(game['PTS']) for game in recent_games)
         total_wins = sum(1 for game in recent_games if game['WL'] == 'W')
 
+        # Calculate opponent points by extracting from score differential
+        # League average is ~112 points, we can estimate opponent points
+        total_opp_pts = 0
+        for game in recent_games:
+            # Use league average of 112 as baseline
+            # This is an approximation since API doesn't provide direct opponent scores
+            pts = float(game['PTS'])
+            # Estimate based on win/loss and typical point differential
+            if game['WL'] == 'W':
+                # Wins typically by 5-10 points, use 7 as average
+                opp_pts = pts - 7
+            else:
+                # Losses typically by 5-10 points, use 7 as average
+                opp_pts = pts + 7
+            total_opp_pts += opp_pts
+
         stats = {
             'avg_points_5': total_pts / len(recent_games),
-            'avg_opp_points_5': 0,  # API doesn't provide opponent points easily
+            'avg_opp_points_5': total_opp_pts / len(recent_games),  # Approximation
             'win_rate_5': total_wins / len(recent_games)
         }
 

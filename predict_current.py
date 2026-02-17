@@ -117,9 +117,11 @@ def predict_matchup(home_team, visitor_team):
     # Display stats
     print(f"\n{home_name} (Home) - Last 5 Games:")
     print(f"  Avg Points Scored: {home_stats['avg_points_5']:.1f}")
-    print(f"  Avg Points Allowed: {home_stats['avg_opp_points_5']:.1f}")
+    print(f"  Avg Points Allowed: {home_stats['avg_opp_points_5']:.1f} (estimated)")
     print(f"  Win Rate: {home_stats['win_rate_5']:.1%}")
-    print(f"  Record: {int(home_stats['win_rate_5'] * 5)}-{int((1 - home_stats['win_rate_5']) * 5)}")
+    wins = round(home_stats['win_rate_5'] * 5)
+    losses = 5 - wins
+    print(f"  Record: {wins}-{losses}")
 
     print(f"\nRecent games:")
     for game in home_games[:5]:
@@ -131,9 +133,11 @@ def predict_matchup(home_team, visitor_team):
 
     print(f"\n{visitor_name} (Visitor) - Last 5 Games:")
     print(f"  Avg Points Scored: {visitor_stats['avg_points_5']:.1f}")
-    print(f"  Avg Points Allowed: {visitor_stats['avg_opp_points_5']:.1f}")
+    print(f"  Avg Points Allowed: {visitor_stats['avg_opp_points_5']:.1f} (estimated)")
     print(f"  Win Rate: {visitor_stats['win_rate_5']:.1%}")
-    print(f"  Record: {int(visitor_stats['win_rate_5'] * 5)}-{int((1 - visitor_stats['win_rate_5']) * 5)}")
+    wins = round(visitor_stats['win_rate_5'] * 5)
+    losses = 5 - wins
+    print(f"  Record: {wins}-{losses}")
 
     print(f"\nRecent games:")
     for game in visitor_games[:5]:
