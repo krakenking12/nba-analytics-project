@@ -414,7 +414,7 @@ def display_results(accuracy, correct, total, high_conf_correct, high_conf_total
     print(f"\n{'='*70}")
 
 
-VALID_SEASONS = ["2021-22", "2022-23", "2023-24", "2024-25"]
+VALID_SEASONS = ["2021-22", "2022-23", "2023-24", "2024-25", "2025-26"]
 
 
 def main():
