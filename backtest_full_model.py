@@ -175,6 +175,26 @@ def get_stats_before_date(team_log, before_date, last_n=10):
     return calculate_team_average_stats(recent, last_n)
 
 
+def get_rest_days(team_log, game_date):
+    """
+    Return number of days since the team's last game before game_date.
+    Returns 3 (well-rested default) if no prior game found.
+    """
+    past_dates = [
+        d for g in team_log
+        if (d := parse_game_date(g['game_date'])) is not None and d < game_date
+    ]
+    if not past_dates:
+        return 3
+    last_game = max(past_dates)
+    return (game_date - last_game).days
+
+
+def is_back_to_back(team_log, game_date):
+    """Return 1 if the team played yesterday, 0 otherwise."""
+    return 1 if get_rest_days(team_log, game_date) == 1 else 0
+
+
 def compute_net_rating(stats):
     """Approximate net rating from average offensive stats and win rate."""
     estimated_net = stats['avg_off_rating'] - 112  # 112 = avg NBA off rating
@@ -194,11 +214,20 @@ def extract_features(game, team_logs):
     if game_date is None:
         raise ValueError(f"Could not parse date: {game['game_date']}")
 
-    home_stats = get_stats_before_date(team_logs.get(home_team, []), game_date)
-    away_stats = get_stats_before_date(team_logs.get(away_team, []), game_date)
+    home_log = team_logs.get(home_team, [])
+    away_log = team_logs.get(away_team, [])
+
+    home_stats = get_stats_before_date(home_log, game_date)
+    away_stats = get_stats_before_date(away_log, game_date)
 
     home_net_rating = compute_net_rating(home_stats)
     away_net_rating = compute_net_rating(away_stats)
+
+    # Rest and fatigue features
+    home_rest = get_rest_days(home_log, game_date)
+    away_rest = get_rest_days(away_log, game_date)
+    home_b2b = is_back_to_back(home_log, game_date)
+    away_b2b = is_back_to_back(away_log, game_date)
 
     travel_distance = calculate_travel_distance(away_team, home_team)
 
@@ -224,6 +253,11 @@ def extract_features(game, team_logs):
         home_stats['avg_off_rating'],                                   # 9
         away_stats['avg_off_rating'],                                   # 10
         home_stats['avg_off_rating'] - away_stats['avg_off_rating'],    # 11
+        home_rest,                                                      # 12
+        away_rest,                                                      # 13
+        away_rest - home_rest,                                          # 14: rest advantage (positive = away more rested)
+        home_b2b,                                                       # 15
+        away_b2b,                                                       # 16
     ]
 
     return features
