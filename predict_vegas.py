@@ -236,16 +236,104 @@ def predict_matchup(home_team, visitor_team):
 
     print(f"\nConfidence: {emoji} {confidence}")
 
-    # Key factors
-    print(f"\n📊 Key Factors:")
-    net_diff = prediction['advanced_stats']['home_net_rating'] - \
-               prediction['advanced_stats']['visitor_net_rating']
-    print(f"  Net Rating Advantage: {home_name if net_diff > 0 else visitor_name} "
-          f"({abs(net_diff):+.1f})")
+    # Detailed key factors breakdown
+    print(f"\n" + "="*70)
+    print(f"📊 KEY STATS BREAKDOWN (What Influenced This Prediction)")
+    print("="*70)
+
+    adv = prediction['advanced_stats']
+
+    # 1. Net Rating (Most Important!)
+    print(f"\n1️⃣  NET RATING (Most Important! ~40% of prediction weight)")
+    print(f"    {home_name}: {adv['home_net_rating']:+.1f} pts/100 poss")
+    print(f"    {visitor_name}: {adv['visitor_net_rating']:+.1f} pts/100 poss")
+    net_diff = adv['home_net_rating'] - adv['visitor_net_rating']
+    if abs(net_diff) > 5:
+        print(f"    → 🔥 MAJOR EDGE: {home_name if net_diff > 0 else visitor_name} "
+              f"({abs(net_diff):.1f} pts advantage)")
+    elif abs(net_diff) > 2:
+        print(f"    → ✓ Edge: {home_name if net_diff > 0 else visitor_name} "
+              f"({abs(net_diff):.1f} pts advantage)")
+    else:
+        print(f"    → Even match (difference: {abs(net_diff):.1f} pts)")
+
+    # 2. Recent Form
+    print(f"\n2️⃣  RECENT FORM (Last 5 games, ~20% weight)")
+    print(f"    {home_name}: {home_stats['avg_points_5']:.1f} PPG, "
+          f"{home_stats['win_rate_5']:.1%} win rate")
+    print(f"    {visitor_name}: {visitor_stats['avg_points_5']:.1f} PPG, "
+          f"{visitor_stats['win_rate_5']:.1%} win rate")
+    if home_stats['win_rate_5'] > 0.6 and visitor_stats['win_rate_5'] < 0.4:
+        print(f"    → {home_name} is hot, {visitor_name} is struggling")
+    elif visitor_stats['win_rate_5'] > 0.6 and home_stats['win_rate_5'] < 0.4:
+        print(f"    → {visitor_name} is hot, {home_name} is struggling")
+    else:
+        print(f"    → Both teams in similar form")
+
+    # 3. Pace
+    print(f"\n3️⃣  PACE (Tempo of game, ~15% weight)")
+    print(f"    {home_name}: {adv['home_pace']:.1f} possessions/game")
+    print(f"    {visitor_name}: {adv['visitor_pace']:.1f} possessions/game")
+    pace_diff = abs(adv['home_pace'] - adv['visitor_pace'])
+    if pace_diff > 5:
+        faster = home_name if adv['home_pace'] > adv['visitor_pace'] else visitor_name
+        print(f"    → ⚡ Pace clash! {faster} plays much faster ({pace_diff:.1f} poss/game)")
+    else:
+        print(f"    → Similar pace (difference: {pace_diff:.1f} poss/game)")
+
+    # 4. Travel & Fatigue
+    print(f"\n4️⃣  TRAVEL & FATIGUE (~10% weight)")
+    print(f"    Distance: {travel_distance:.0f} miles")
+    if travel_distance > 2500:
+        print(f"    → 🛫 COAST-TO-COAST! Major fatigue for {visitor_name} ({travel_fatigue:.1f}%)")
+    elif travel_distance > 1500:
+        print(f"    → ✈️  Long trip for {visitor_name} ({travel_fatigue:.1f}% impact)")
+    elif travel_distance > 500:
+        print(f"    → Travel fatigue: {travel_fatigue:.1f}% impact")
+    else:
+        print(f"    → Short trip, minimal fatigue ({travel_fatigue:.1f}%)")
+
+    # 5. Home Court Advantage
+    print(f"\n5️⃣  HOME COURT ADVANTAGE (~15% weight)")
+    print(f"    {home_name} gets +3.5 pts advantage at home")
+    print(f"    → This is built into the {prediction['home_win_probability']:.1%} probability")
+
+    # Summary of decision
+    print(f"\n" + "="*70)
+    print(f"⚖️  DECISION SUMMARY")
+    print("="*70)
+
+    # Build decision explanation
+    factors_favoring_home = []
+    factors_favoring_away = []
+
+    if net_diff > 0:
+        factors_favoring_home.append(f"Net Rating (+{net_diff:.1f})")
+    else:
+        factors_favoring_away.append(f"Net Rating ({net_diff:.1f})")
+
+    if home_stats['win_rate_5'] > visitor_stats['win_rate_5']:
+        factors_favoring_home.append(f"Better form ({home_stats['win_rate_5']:.0%} vs {visitor_stats['win_rate_5']:.0%})")
+    else:
+        factors_favoring_away.append(f"Better form ({visitor_stats['win_rate_5']:.0%} vs {home_stats['win_rate_5']:.0%})")
+
+    factors_favoring_home.append("Home court (+3.5 pts)")
 
     if travel_distance > 1000:
-        print(f"  Travel Fatigue: {visitor_name} traveled {travel_distance:.0f} miles "
-              f"({travel_fatigue:.1f}% impact)")
+        factors_favoring_home.append(f"Travel fatigue ({travel_distance:.0f} miles)")
+
+    print(f"\n✓ Factors favoring {home_name}:")
+    for factor in factors_favoring_home:
+        print(f"  • {factor}")
+
+    if factors_favoring_away:
+        print(f"\n✗ Factors favoring {visitor_name}:")
+        for factor in factors_favoring_away:
+            print(f"  • {factor}")
+
+    print(f"\n→ Final Prediction: {prediction['prediction']}")
+    print(f"   {home_name}: {prediction['home_win_probability']:.1%}")
+    print(f"   {visitor_name}: {prediction['visitor_win_probability']:.1%}")
 
     # Get data freshness
     if len(home_games) > 0:

@@ -80,13 +80,16 @@ def get_team_schedule(team_abbr, num_games=10):
             return None
 
         upcoming_games = []
-        current_date = datetime.now().astimezone()
+        # Use UTC for comparison to avoid timezone issues
+        from datetime import timezone
+        current_date = datetime.now(timezone.utc)
 
         for event in data['events']:
             game_date_str = event['date']
+            # ESPN returns UTC times
             game_date = datetime.fromisoformat(game_date_str.replace('Z', '+00:00'))
 
-            # Only include future games
+            # Only include future games (compare in UTC)
             if game_date > current_date:
                 competitions = event['competitions'][0]
                 competitors = competitions['competitors']
@@ -149,10 +152,12 @@ def display_schedule(team_name, num_games=10):
         print("   (Season might be over or on break)")
         return
 
-    print(f"\n✓ Found {len(games)} upcoming games:\n")
+    print(f"\n✓ Found {len(games)} upcoming games:")
+    print(f"   (Note: Dates shown in UTC - may be off by 1 day depending on your timezone)\n")
 
     for i, game in enumerate(games, 1):
-        date_str = game['date'].strftime('%a, %b %d, %Y at %I:%M %p')
+        # Show just the date, not the time (times can be confusing across timezones)
+        date_str = game['date'].strftime('%a, %b %d, %Y')
         matchup = game['full_matchup']
         home_away = game['home_away']
         opponent = game['opponent']
