@@ -424,7 +424,7 @@ def main():
     print("STEP 1: Data Collection")
     print("-" * 40)
     nba.fetch_teams()
-    nba.fetch_games(seasons=['2023'], max_pages=5)  # Fetch recent season
+    nba.fetch_games(seasons=['2025'], max_pages=10)  # Fetch 2025-2026 season
     
     # Step 2: Engineer features
     print("\nSTEP 2: Feature Engineering")

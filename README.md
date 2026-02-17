@@ -76,7 +76,7 @@ python3 predict_matchup.py "Celtics" "Heat"
 ```
 
 Features:
-- 📅 Uses **2024 season** data (most recent available)
+- 📅 Uses **2025-2026 season** data (CURRENT season!)
 - 🏀 Predict **any team matchup**
 - 📊 Real team statistics from last 5 games
 - 🎲 Win probability for both teams

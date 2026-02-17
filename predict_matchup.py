@@ -256,11 +256,11 @@ def main():
     print("-"*60)
 
     nba.fetch_teams()
-    nba.fetch_games(seasons=['2024'], max_pages=10)  # 2024-2025 season
+    nba.fetch_games(seasons=['2025'], max_pages=10)  # 2025-2026 season (current)
 
     if nba.games_data is None or len(nba.games_data) == 0:
-        print("\n⚠️  No 2024 season data available. Trying 2023...")
-        nba.fetch_games(seasons=['2023'], max_pages=10)
+        print("\n⚠️  No 2025 season data available. Trying 2024...")
+        nba.fetch_games(seasons=['2024'], max_pages=10)
 
     print(f"✓ Loaded {len(nba.games_data)} games")
 
