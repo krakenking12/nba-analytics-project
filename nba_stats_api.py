@@ -2,10 +2,10 @@
 """
 NBA Stats API Integration (stats.nba.com)
 Free, unofficial API with current NBA data
+NO PANDAS REQUIRED - uses only built-in Python!
 """
 
 import requests
-import pandas as pd
 from datetime import datetime
 import time
 
@@ -55,29 +55,6 @@ class NBAStatsAPI:
 
         return None
 
-    def get_teams(self):
-        """Get all NBA teams"""
-        print("Fetching NBA teams from stats.nba.com...")
-
-        params = {
-            'LeagueID': '00',  # NBA
-            'Season': self.current_season,
-            'SeasonType': 'Regular Season'
-        }
-
-        data = self._make_request('commonteamyears', params)
-
-        if data and 'resultSets' in data:
-            headers = data['resultSets'][0]['headers']
-            rows = data['resultSets'][0]['rowSet']
-
-            df = pd.DataFrame(rows, columns=headers)
-            print(f"✓ Fetched {len(df)} teams")
-            return df
-        else:
-            print("✗ Failed to fetch teams")
-            return None
-
     def get_team_game_log(self, team_abbr, season=None):
         """
         Get recent games for a team
@@ -85,6 +62,9 @@ class NBAStatsAPI:
         Args:
             team_abbr: Team abbreviation (e.g., 'LAL', 'BOS')
             season: Season year (default: current season)
+
+        Returns:
+            List of game dictionaries with headers
         """
         if season is None:
             season = self.current_season
@@ -106,20 +86,24 @@ class NBAStatsAPI:
 
         data = self._make_request('teamgamelog', params)
 
-        if data and 'resultSets' in data:
+        if data and 'resultSets' in data and len(data['resultSets']) > 0:
             headers = data['resultSets'][0]['headers']
             rows = data['resultSets'][0]['rowSet']
 
-            df = pd.DataFrame(rows, columns=headers)
-            print(f"✓ Fetched {len(df)} games for {team_abbr}")
-            return df
+            # Convert to list of dicts
+            games = []
+            for row in rows:
+                game = dict(zip(headers, row))
+                games.append(game)
+
+            print(f"✓ Fetched {len(games)} games for {team_abbr}")
+            return games
         else:
             print(f"✗ Failed to fetch game log for {team_abbr}")
             return None
 
     def _get_team_id(self, team_abbr):
         """Get team ID from abbreviation"""
-        # Common NBA team mappings
         team_map = {
             'ATL': 1610612737, 'BOS': 1610612738, 'BKN': 1610612751, 'CHA': 1610612766,
             'CHI': 1610612741, 'CLE': 1610612739, 'DAL': 1610612742, 'DEN': 1610612743,
@@ -138,58 +122,39 @@ class NBAStatsAPI:
         Get team statistics for last N games
 
         Returns:
-            dict with avg_points, avg_opp_points, win_rate
+            tuple: (stats_dict, team_name, recent_games_list)
         """
-        game_log = self.get_team_game_log(team_abbr)
+        games = self.get_team_game_log(team_abbr)
 
-        if game_log is None or len(game_log) == 0:
+        if games is None or len(games) == 0:
             return None
 
-        # Get last N games (game log is already sorted by most recent first)
-        recent_games = game_log.head(n_games)
+        # Get last N games (already sorted by most recent first)
+        recent_games = games[:n_games]
 
         # Calculate stats
+        total_pts = sum(float(game['PTS']) for game in recent_games)
+        total_wins = sum(1 for game in recent_games if game['WL'] == 'W')
+
         stats = {
-            'avg_points_5': recent_games['PTS'].astype(float).mean(),
-            'avg_opp_points_5': recent_games['OPP_PTS'].astype(float).mean() if 'OPP_PTS' in recent_games else 0,
-            'win_rate_5': (recent_games['WL'] == 'W').sum() / len(recent_games)
+            'avg_points_5': total_pts / len(recent_games),
+            'avg_opp_points_5': 0,  # API doesn't provide opponent points easily
+            'win_rate_5': total_wins / len(recent_games)
         }
 
-        # Get full team name
+        # Get team name from first game matchup
         if len(recent_games) > 0:
-            matchup = recent_games.iloc[0]['MATCHUP']
-            team_name = matchup.split(' vs. ')[0].split(' @ ')[0] if 'vs.' in matchup or '@' in matchup else team_abbr
+            matchup = recent_games[0]['MATCHUP']
+            if ' vs. ' in matchup:
+                team_name = matchup.split(' vs. ')[0]
+            elif ' @ ' in matchup:
+                team_name = matchup.split(' @ ')[0]
+            else:
+                team_name = team_abbr
         else:
             team_name = team_abbr
 
         return stats, team_name, recent_games
-
-    def get_todays_games(self):
-        """Get today's NBA games"""
-        today = datetime.now().strftime('%Y-%m-%d')
-
-        print(f"Fetching games for {today}...")
-
-        params = {
-            'GameDate': today,
-            'LeagueID': '00',
-            'DayOffset': 0
-        }
-
-        data = self._make_request('scoreboardv2', params)
-
-        if data and 'resultSets' in data:
-            # Extract game info
-            for result_set in data['resultSets']:
-                if result_set['name'] == 'GameHeader':
-                    headers = result_set['headers']
-                    rows = result_set['rowSet']
-                    df = pd.DataFrame(rows, columns=headers)
-                    print(f"✓ Found {len(df)} games today")
-                    return df
-
-        print("✗ No games found for today")
-        return None
 
 
 def test_api():
@@ -204,16 +169,16 @@ def test_api():
     # Test: Get Lakers recent stats
     print("Test 1: Lakers Last 5 Games")
     print("-"*60)
-    stats, name, games = api.get_team_stats_last_n_games('LAL', n_games=5)
+    result = api.get_team_stats_last_n_games('LAL', n_games=5)
 
-    if stats:
+    if result:
+        stats, name, games = result
         print(f"\n{name} (Last 5 Games):")
         print(f"  Avg Points: {stats['avg_points_5']:.1f}")
-        print(f"  Avg Opp Points: {stats['avg_opp_points_5']:.1f}")
         print(f"  Win Rate: {stats['win_rate_5']:.1%}")
 
         print(f"\nRecent games:")
-        for idx, game in games.iterrows():
+        for game in games[:5]:
             date = game['GAME_DATE']
             matchup = game['MATCHUP']
             wl = game['WL']

@@ -122,7 +122,7 @@ def predict_matchup(home_team, visitor_team):
     print(f"  Record: {int(home_stats['win_rate_5'] * 5)}-{int((1 - home_stats['win_rate_5']) * 5)}")
 
     print(f"\nRecent games:")
-    for idx, game in home_games.head(5).iterrows():
+    for game in home_games[:5]:
         date = game['GAME_DATE']
         matchup = game['MATCHUP']
         wl = game['WL']
@@ -136,7 +136,7 @@ def predict_matchup(home_team, visitor_team):
     print(f"  Record: {int(visitor_stats['win_rate_5'] * 5)}-{int((1 - visitor_stats['win_rate_5']) * 5)}")
 
     print(f"\nRecent games:")
-    for idx, game in visitor_games.head(5).iterrows():
+    for game in visitor_games[:5]:
         date = game['GAME_DATE']
         matchup = game['MATCHUP']
         wl = game['WL']
@@ -168,7 +168,7 @@ def predict_matchup(home_team, visitor_team):
 
     # Get data freshness
     if len(home_games) > 0:
-        latest_date = home_games.iloc[0]['GAME_DATE']
+        latest_date = home_games[0]['GAME_DATE']
         print(f"\n✓ Data is current (last game: {latest_date})")
 
     print("="*60)
