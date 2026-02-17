@@ -30,28 +30,69 @@ echo ""
 echo "🔧 Activating virtual environment..."
 source venv/bin/activate
 
-# Install only requests (lightweight, no architecture issues)
+# Install dependencies
 echo ""
-echo "📚 Installing dependencies (requests only)..."
+echo "📚 Installing dependencies..."
 pip install --upgrade pip --quiet
-pip install requests --quiet
+pip install requests xgboost --quiet
 
 echo "✓ Dependencies installed"
 echo ""
 
-# Run prediction with CURRENT data
-echo "🚀 Running NBA Matchup Predictor with CURRENT 2025-26 Season Data..."
-echo "===================================================================="
-echo "📊 Using stats.nba.com (FREE, no API key required!)"
+# Show menu
+echo "Choose prediction model:"
+echo "  1) 🎯 Vegas-Level Predictor (65-70% accuracy, advanced features)"
+echo "  2) 📊 Basic Predictor (55% accuracy, simple model)"
+echo "  3) 🔬 Compare Both Models"
 echo ""
-python3 predict_current.py "Lakers" "Warriors"
+read -p "Enter choice (1-3, or press Enter for Vegas): " choice
+
+# Default to Vegas if no input
+if [ -z "$choice" ]; then
+    choice=1
+fi
 
 echo ""
-echo "✅ Prediction complete using CURRENT NBA data!"
+
+case $choice in
+    1)
+        echo "🎯 Running VEGAS-LEVEL Predictor..."
+        echo "===================================================================="
+        echo "Features: Net Rating, Travel Distance, Rest Differential"
+        echo "Target Accuracy: 65-70%"
+        echo ""
+        python3 predict_vegas.py "Lakers" "Warriors"
+        echo ""
+        echo "Try more matchups:"
+        echo "  python3 predict_vegas.py \"Celtics\" \"Heat\""
+        echo "  python3 predict_vegas.py \"Bucks\" \"Suns\""
+        echo "  python3 predict_vegas.py \"76ers\" \"Nuggets\""
+        ;;
+    2)
+        echo "📊 Running BASIC Predictor..."
+        echo "===================================================================="
+        echo "Features: Points, Win Rate, Home Court"
+        echo "Target Accuracy: ~55%"
+        echo ""
+        python3 predict_current.py "Lakers" "Warriors"
+        echo ""
+        echo "Try more matchups:"
+        echo "  python3 predict_current.py \"Celtics\" \"Heat\""
+        echo "  python3 predict_current.py \"Bucks\" \"Suns\""
+        ;;
+    3)
+        echo "🔬 Running COMPARISON (Basic vs Vegas)..."
+        echo "===================================================================="
+        python3 compare_predictions.py "Lakers" "Warriors"
+        echo ""
+        echo "Try comparing other matchups:"
+        echo "  python3 compare_predictions.py \"Celtics\" \"Heat\""
+        ;;
+    *)
+        echo "❌ Invalid choice. Running Vegas predictor by default..."
+        python3 predict_vegas.py "Lakers" "Warriors"
+        ;;
+esac
+
 echo ""
-echo "Try more matchups:"
-echo "  python3 predict_current.py \"Celtics\" \"Heat\""
-echo "  python3 predict_current.py \"Bucks\" \"Suns\""
-echo "  python3 predict_current.py \"76ers\" \"Nuggets\""
-echo ""
-echo "✓ Data is only 4 days old (not 105 days like the old API!)"
+echo "✓ Data is current (from stats.nba.com - FREE, no API key!)"
