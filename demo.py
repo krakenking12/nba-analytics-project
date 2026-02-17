@@ -118,14 +118,20 @@ def simple_predict(home_stats, visitor_stats):
 
 def main():
     print("="*60)
-    print("NBA ANALYTICS DEMO")
+    print("⚠️  NBA ANALYTICS DEMO - SAMPLE DATA ONLY")
     print("="*60)
     print()
-    
+    print("WARNING: This demo uses RANDOMLY GENERATED data!")
+    print("         This is NOT real NBA statistics.")
+    print("         For REAL predictions, use predict_matchup.py")
+    print()
+    print("="*60)
+    print()
+
     # Generate sample data
-    print("Generating sample game data...")
+    print("Generating SAMPLE game data (not real!)...")
     games = generate_sample_games(100)
-    print(f"✓ Generated {len(games)} games")
+    print(f"✓ Generated {len(games)} SAMPLE games")
     print()
     
     # Calculate stats for each team

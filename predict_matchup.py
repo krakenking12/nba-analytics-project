@@ -41,7 +41,18 @@ def list_teams(nba):
 
 
 def get_team_recent_stats(nba, team_name, games_back=5):
-    """Calculate recent performance stats for a team"""
+    """
+    Calculate recent performance stats for a team
+
+    Args:
+        nba: NBAAnalytics instance
+        team_name: Name of the team to analyze
+        games_back: Number of recent games to analyze (default: 5)
+                   - 3 games: Very recent form (volatile)
+                   - 5 games: Recent momentum (balanced) ✓ RECOMMENDED
+                   - 10 games: Longer trend (more stable)
+                   - 20 games: Season average (less responsive to recent changes)
+    """
     if nba.teams_data is None:
         nba.fetch_teams()
 
@@ -256,11 +267,18 @@ def main():
     print("-"*60)
 
     nba.fetch_teams()
-    nba.fetch_games(seasons=['2025'], max_pages=10)  # 2025-2026 season (current)
+
+    print("Fetching 2025-2026 season games (current season only)...")
+    nba.fetch_games(seasons=['2025'], max_pages=10)
 
     if nba.games_data is None or len(nba.games_data) == 0:
-        print("\n⚠️  No 2025 season data available. Trying 2024...")
-        nba.fetch_games(seasons=['2024'], max_pages=10)
+        print("\n❌ ERROR: No 2025-2026 season data available from API.")
+        print("   This could mean:")
+        print("   1. The season hasn't started yet")
+        print("   2. API is down or rate limited")
+        print("   3. API key is invalid")
+        print("\n   Try running: python3 demo.py (for sample data)")
+        return
 
     print(f"✓ Loaded {len(nba.games_data)} games")
 

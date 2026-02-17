@@ -39,18 +39,33 @@ pip install -r requirements.txt --quiet
 echo "✓ Dependencies installed"
 echo ""
 
-# Run the demo
-echo "🚀 Running NBA Analytics Demo..."
-echo "================================"
+# Load API key
+if [ -f .env ]; then
+    source load_env.sh
+else
+    echo "⚠️  No .env file found. API key required for real data."
+    echo "   Running demo with SAMPLE DATA instead..."
+    echo ""
+    python3 demo.py
+    echo ""
+    echo "⚠️  This was SAMPLE DATA, not real NBA stats!"
+    echo ""
+    echo "To use REAL data:"
+    echo "  1. Add your API key: echo 'NBA_API_KEY=your_key' > .env"
+    echo "  2. Run: source load_env.sh && python3 predict_matchup.py"
+    exit 0
+fi
+
+# Run real prediction
+echo "🚀 Running NBA Matchup Predictor with REAL 2025-2026 Season Data..."
+echo "=================================================================="
 echo ""
-python3 demo.py
+python3 predict_matchup.py "Lakers" "Warriors"
 
 echo ""
-echo "✅ Demo complete!"
+echo "✅ Prediction complete using REAL NBA data!"
 echo ""
-echo "Next steps:"
-echo "  1. Check the generated 'nba_analytics_dashboard.png' for visualizations"
-echo "  2. Run 'python3 nba_analytics.py' for the full analysis"
-echo "  3. Modify the code to explore different teams or seasons"
-echo ""
-echo "To run again: source venv/bin/activate && python3 demo.py"
+echo "Try more matchups:"
+echo "  python3 predict_matchup.py \"Celtics\" \"Heat\""
+echo "  python3 predict_matchup.py \"Bucks\" \"Suns\""
+echo "  python3 predict_matchup.py  # Interactive mode"
