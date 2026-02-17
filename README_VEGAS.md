@@ -188,6 +188,34 @@ python3 predict_vegas.py "Home Team" "Away Team"
 python3 compare_predictions.py "Home Team" "Away Team"
 ```
 
+### 🆕 Get Team Schedule (Future Games)
+```bash
+python3 get_schedule.py "Team Name" [num_games]
+```
+
+Examples:
+```bash
+python3 get_schedule.py "Lakers"        # Next 10 games
+python3 get_schedule.py "Lakers" 5      # Next 5 games
+python3 get_schedule.py "Celtics" 15    # Next 15 games
+```
+
+### 🆕 Predict All Upcoming Games (Automated)
+```bash
+python3 predict_upcoming.py "Team Name" [num_games]
+```
+
+Examples:
+```bash
+python3 predict_upcoming.py "Lakers"     # Next 5 games
+python3 predict_upcoming.py "Lakers" 10  # Next 10 games
+```
+
+This will:
+1. Fetch the team's upcoming schedule
+2. Run Vegas predictions for each game
+3. Show predicted record (e.g., "3-2 expected")
+
 ### Popular Matchups to Try:
 ```bash
 python3 predict_vegas.py "Lakers" "Warriors"
